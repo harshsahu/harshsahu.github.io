@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- viewport-fit=cover add kiya taaki notch area cover ho -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Browser UI color control ke liye meta tag -->
+    <meta name="theme-color" content="#ffffff" id="theme-color-meta">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Pure Color Fullscreen</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            /* Mobile ke liye dynamic height unit */
+            height: 100dvh; 
+            background-color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.5s ease;
+        }
+
+        /* Guide text style */
+        #hint-text {
+            color: #888888;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: opacity 0.5s ease, color 0.3s ease;
+            user-select: none;
+            padding: 0 20px;
+        }
+
+        /* Color buttons container */
+        #color-palette {
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+            transition: opacity 0.5s ease;
+            flex-wrap: wrap;
+            justify-content: center;
+            /* Safe area padding for iPhones with notch */
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Individual color button style */
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .color-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Fullscreen hone par sab gayab karne ke liye */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Dark background ke liye text color white karne ki class */
+        .text-light {
+            color: #f0f0f0 !important;
+        }
+        
+        /* Light background ke liye text color dark karne ki class */
+        .text-dark {
+            color: #333333 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hint-text" class="text-dark">
+        Apna rang chunein aur screen par kahin bhi click karein
+    </div>
+
+    <!-- Color options yahan hain -->
+    <div id="color-palette">
+        <!-- White -->
+        <div class="color-btn" style="background-color: #ffffff;" onclick="changeColor('#ffffff', 'dark')"></div>
+        <!-- Black -->
+        <div class="color-btn" style="background-color: #000000;" onclick="changeColor('#000000', 'light')"></div>
+        <!-- Red -->
+        <div class="color-btn" style="background-color: #ff3b30;" onclick="changeColor('#ff3b30', 'light')"></div>
+        <!-- Green -->
+        <div class="color-btn" style="background-color: #4cd964;" onclick="changeColor('#4cd964', 'dark')"></div>
+        <!-- Blue -->
+        <div class="color-btn" style="background-color: #007aff;" onclick="changeColor('#007aff', 'light')"></div>
+        <!-- Yellow -->
+        <div class="color-btn" style="background-color: #ffcc00;" onclick="changeColor('#ffcc00', 'dark')"></div>
+        <!-- Purple -->
+        <div class="color-btn" style="background-color: #5856d6;" onclick="changeColor('#5856d6', 'light')"></div>
+        <!-- Grey -->
+        <div class="color-btn" style="background-color: #8e8e93;" onclick="changeColor('#8e8e93', 'light')"></div>
+    </div>
+
+    <script>
+        const hintText = document.getElementById('hint-text');
+        const colorPalette = document.getElementById('color-palette');
+        const docElem = document.documentElement;
+        const themeMeta = document.getElementById('theme-color-meta');
+
+        // Color change function
+        function changeColor(color, theme) {
+            document.body.style.backgroundColor = color;
+            
+            // Mobile browser status bar ka color change karna
+            themeMeta.setAttribute('content', color);
+            
+            // Text color contrast set karna
+            if (theme === 'light') {
+                hintText.classList.remove('text-dark');
+                hintText.classList.add('text-light');
+            } else {
+                hintText.classList.remove('text-light');
+                hintText.classList.add('text-dark');
+            }
+            
+            // Event bubbling rokna
+            if (event) event.stopPropagation();
+        }
+
+        // Fullscreen toggle logic
+        document.addEventListener('click', function(e) {
+            // Agar click color palette ke andar hua hai to kuch mat karo
+            if (e.target.closest('#color-palette')) return;
+
+            if (!document.fullscreenElement && 
+                !document.mozFullScreenElement && 
+                !document.webkitFullscreenElement && 
+                !document.msFullscreenElement) {
+
+                // Enter Fullscreen
+                if (docElem.requestFullscreen) docElem.requestFullscreen();
+                else if (docElem.msRequestFullscreen) docElem.msRequestFullscreen();
+                else if (docElem.mozRequestFullScreen) docElem.mozRequestFullScreen();
+                else if (docElem.webkitRequestFullscreen) docElem.webkitRequestFullscreen();
+                
+                // Sab elements gayab kar do
+                hintText.classList.add('hidden');
+                colorPalette.classList.add('hidden');
+                
+                // Cursor hide
+                setTimeout(() => {
+                    if(document.fullscreenElement || document.webkitFullscreenElement) {
+                        document.body.style.cursor = 'none';
+                    }
+                }, 100);
+
+            } else {
+                // Exit Fullscreen
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.msExitFullscreen) document.msExitFullscreen();
+                else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                
+                // Sab wapis dikhao
+                hintText.classList.remove('hidden');
+                colorPalette.classList.remove('hidden');
+                document.body.style.cursor = 'pointer';
+            }
+        });
+
+        // Esc key dabane par UI wapis laane ke liye listener
+        function checkFullscreen() {
+            if (!document.fullscreenElement && 
+                !document.webkitIsFullScreen && 
+                !document.mozFullScreen && 
+                !document.msFullscreenElement) {
+                
+                hintText.classList.remove('hidden');
+                colorPalette.classList.remove('hidden');
+                document.body.style.cursor = 'pointer';
+            }
+        }
+
+        document.addEventListener('fullscreenchange', checkFullscreen);
+        document.addEventListener('webkitfullscreenchange', checkFullscreen);
+        document.addEventListener('mozfullscreenchange', checkFullscreen);
+        document.addEventListener('MSFullscreenChange', checkFullscreen);
+    </script>
+</body>
+</html>
