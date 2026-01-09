@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure White Fullscreen</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff; /* Pure White */
+            overflow: hidden; /* Scrollbars hatane ke liye */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+            cursor: pointer; /* User ko batane ke liye ki click kar sakte hain */
+            -webkit-tap-highlight-color: transparent; /* Mobile pe tap color hatane ke liye */
+        }
+
+        /* Shuruat mein dikhne wala text jo gayab ho jayega */
+        #hint-text {
+            color: #e0e0e0; /* Bahut halka grey, taaki white feel kharab na ho */
+            font-size: 1.2rem;
+            text-align: center;
+            transition: opacity 0.5s ease;
+            user-select: none;
+        }
+
+        /* Fullscreen hone par text gayab karne ke liye class */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ye text sirf shuru mein dikhega guide karne ke liye -->
+    <div id="hint-text">
+        Fullscreen ke liye kahin bhi click karein
+    </div>
+
+    <script>
+        const hintText = document.getElementById('hint-text');
+        const docElem = document.documentElement;
+
+        // Kahin bhi click karne par fullscreen toggle hoga
+        document.addEventListener('click', function() {
+            if (!document.fullscreenElement &&    // Standard
+                !document.mozFullScreenElement && // Firefox
+                !document.webkitFullscreenElement && // Chrome, Safari and Opera
+                !document.msFullscreenElement) {  // IE/Edge
+
+                // Fullscreen enter karna
+                if (docElem.requestFullscreen) {
+                    docElem.requestFullscreen();
+                } else if (docElem.msRequestFullscreen) {
+                    docElem.msRequestFullscreen();
+                } else if (docElem.mozRequestFullScreen) {
+                    docElem.mozRequestFullScreen();
+                } else if (docElem.webkitRequestFullscreen) {
+                    docElem.webkitRequestFullscreen();
+                }
+                
+                // Text ko gayab kar do
+                hintText.classList.add('hidden');
+                
+                // Cursor ko bhi gayab kar do thodi der mein
+                document.body.style.cursor = 'none';
+
+            } else {
+                // Fullscreen exit karna
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+                
+                // Text wapis dikhana (optional, agar aap chahein toh)
+                hintText.classList.remove('hidden');
+                document.body.style.cursor = 'pointer';
+            }
+        });
+
+        // Agar user 'Esc' button se wapis aaye toh bhi text wapis laana
+        document.addEventListener('fullscreenchange', checkFullscreen);
+        document.addEventListener('webkitfullscreenchange', checkFullscreen);
+        document.addEventListener('mozfullscreenchange', checkFullscreen);
+        document.addEventListener('MSFullscreenChange', checkFullscreen);
+
+        function checkFullscreen() {
+            if (!document.fullscreenElement && 
+                !document.webkitIsFullScreen && 
+                !document.mozFullScreen && 
+                !document.msFullscreenElement) {
+                
+                hintText.classList.remove('hidden');
+                document.body.style.cursor = 'pointer';
+            }
+        }
+    </script>
+</body>
+</html>
